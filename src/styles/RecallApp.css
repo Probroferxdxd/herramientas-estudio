@@ -1,0 +1,700 @@
+/* ============================= */
+/* RecallApp - Estilos Principales */
+/* ============================= */
+
+/* Container Principal */
+.recall-app-container {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+.header-recall-app{
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 24px;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.header-recall-app h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-recall-app p {
+    color: #dbeafe;
+    font-size: 0.875rem;
+    margin: 0.25rem 0 0 0;
+}
+
+.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+/* ============================= */
+/* NAVIGATION */
+/* ============================= */
+nav {
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    margin-bottom: 1.5rem;
+}
+
+nav .flex {
+    display: flex;
+    gap: 0.25rem;
+}
+
+nav button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    color: #4b5563;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+nav button:hover {
+    color: #111827;
+}
+
+nav button.active {
+    border-bottom-color: #2563eb;
+    color: #2563eb;
+}
+
+/* ============================= */
+/* MAIN CONTENT */
+/* ============================= */
+main {
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+/* ============================= */
+/* DASHBOARD */
+/* ============================= */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dashboard-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.stat-card-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Stat Card Color Variants */
+.stat-card.blue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.stat-card.orange {
+    background-color: #ffedd5;
+    color: #9c3c00;
+}
+
+.stat-card.green {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.stat-card.purple {
+    background-color: #f3e8ff;
+    color: #6b21a8;
+}
+
+/* Ejercicios para hoy */
+.ejercicios-hoy-section {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.ejercicios-hoy-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.ejercicios-hoy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ejercicio-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: #f9fafb;
+    border-radius: 0.25rem;
+}
+
+.ejercicio-info {
+    flex: 1;
+}
+
+.ejercicio-curso {
+    font-weight: 500;
+}
+
+.ejercicio-enunciado {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.ejercicio-priority-badge {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.ejercicio-priority-badge.high {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.ejercicio-priority-badge.medium {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.btn-comenzar {
+    margin-top: 1rem;
+    width: 100%;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-comenzar:hover {
+    background-color: #1d4ed8;
+}
+
+/* ============================= */
+/* FORMULARIO INGRESO EJERCICIO */
+/* ============================= */
+.ingreso-ejercicio-container {
+    max-width: 42rem;
+    margin: 0 auto;
+}
+
+.ingreso-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+.form-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #1f2937;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.875rem;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    height: 8rem;
+}
+
+.opciones-container {
+    margin-top: 1rem;
+}
+
+.opcion-input {
+    margin-bottom: 0.5rem;
+}
+
+.dificultad-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.dificultad-range {
+    margin-bottom: 0.5rem;
+}
+
+.dificultad-label {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.imagen-preview {
+    margin-top: 0.75rem;
+    max-height: 16rem;
+    border-radius: 0.25rem;
+    border: 1px solid #e5e7eb;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    flex: 1;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secondary {
+    padding: 0.5rem 1.5rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #f3f4f6;
+}
+
+/* ============================= */
+/* RESOLVER EJERCICIO */
+/* ============================= */
+.resolver-container {
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+.resolver-header {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resolver-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.resolver-counter {
+    color: #4b5563;
+}
+
+.ejercicio-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.ejercicio-meta {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 1rem;
+}
+
+.ejercicio-enunciado-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.ejercicio-imagen {
+    margin: 1rem 0;
+    max-height: 20rem;
+    border-radius: 0.25rem;
+    border: 1px solid #e5e7eb;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Opciones */
+.opciones-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.option-button {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.25rem;
+    background-color: #f9fafb;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Quicksand', sans-serif;
+}
+
+.option-button:hover:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.option-button.selected {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+
+.option-button.correct {
+    background-color: #d1fae5;
+    border-color: #22c55e;
+}
+
+.option-button.incorrect {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+}
+
+.option-button:disabled {
+    cursor: not-allowed;
+}
+
+.option-button strong {
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* Confianza */
+.confianza-section {
+    margin-bottom: 1rem;
+}
+
+.confianza-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.confianza-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.confianza-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    background-color: #f3f4f6;
+}
+
+.confianza-btn.active {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+/* Botones de acción */
+.btn-verificar {
+    width: 100%;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-verificar:hover:not(:disabled) {
+    background-color: #1d4ed8;
+}
+
+.btn-verificar:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+/* Resultado */
+.resultado-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.resultado-box {
+    padding: 1rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
+.resultado-box.correcto {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.resultado-box.incorrecto {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-siguiente {
+    width: 100%;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-siguiente:hover {
+    background-color: #1d4ed8;
+}
+
+/* Footer info */
+.ejercicio-footer {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.ejercicio-footer p {
+    margin: 0.25rem 0;
+}
+
+/* Sin ejercicios */
+.sin-ejercicios {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.sin-ejercicios-texto {
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 1rem;
+}
+
+.btn-volver {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-volver:hover {
+    background-color: #1d4ed8;
+}
+
+/* ============================= */
+/* FILE INPUT ESTILIZADO */
+/* ============================= */
+.file-input-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.file-input-label {
+    display: block;
+    padding: 2rem;
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.file-input-label:hover {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.file-input-label.active {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.file-input-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.file-input-text {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.file-input-hint {
+    display: block;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.file-input-preview-container {
+    margin-top: 1.5rem;
+}
+
+.file-input-preview-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.75rem;
+}
+
+.file-input-preview {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.file-input-preview img {
+    max-width: 100%;
+    max-height: 20rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.file-input-remove-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    transition: all 0.3s ease;
+}
+
+.file-input-remove-btn:hover {
+    background-color: #dc2626;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
