@@ -32,24 +32,24 @@ body, html, #root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .home-container h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   color: #2c3e50;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
   font-weight: 700;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tools-container{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   width: 100%;
   max-width: 1200px;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .tools-container div{
@@ -62,8 +62,8 @@ body, html, #root {
 }
 
 .tools-container div:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
   border-color: #3498db;
 }
 
@@ -73,12 +73,14 @@ body, html, #root {
   justify-content: center;
   width: 100%;
   height: 100%;
-  padding: 3rem 1.5rem;
+  padding: clamp(1.25rem, 4vw, 3rem) 1rem;
   text-decoration: none;
   color: #2c3e50;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   font-weight: 600;
   transition: color 0.3s ease;
+  min-height: 120px;
+  text-align: center;
 }
 
 .tools-container div:hover a {
@@ -142,6 +144,43 @@ body, html, #root {
 
 .tool-container main {
   flex: 1;
-  padding: 2rem;
+  padding: clamp(0.75rem, 3vw, 2rem);
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .tool-container header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .tool-container header button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    gap: 0.25rem;
+  }
+  
+  .tool-container main {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-container header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .tool-container header button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    gap: 0.25rem;
+  }
+  
+  .tool-container header button a {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  
+  .tool-container main {
+    padding: 0.75rem;
+  }
 }

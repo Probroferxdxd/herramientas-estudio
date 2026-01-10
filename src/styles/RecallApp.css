@@ -24,6 +24,34 @@
     margin: 0;
 }
 
+@media (max-width: 768px) {
+    .header-recall-app {
+        padding: 1rem;
+    }
+
+    .header-recall-app h1 {
+        font-size: clamp(1.25rem, 3vw, 1.5rem);
+    }
+
+    .header-recall-app p {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-recall-app {
+        padding: 0.75rem;
+    }
+
+    .header-recall-app h1 {
+        font-size: 1.125rem;
+    }
+
+    .header-recall-app p {
+        font-size: 0.65rem;
+    }
+}
+
 .header-recall-app p {
     color: #dbeafe;
     font-size: 0.875rem;
@@ -71,6 +99,27 @@ nav button {
     border: none;
     cursor: pointer;
     transition: color 0.3s ease, border-color 0.3s ease;
+    font-size: clamp(0.8rem, 2vw, 0.95rem);
+}
+
+@media (max-width: 768px) {
+    nav button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    nav button {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+        gap: 0.15rem;
+    }
+
+    nav {
+        margin-bottom: 1rem;
+    }
 }
 
 nav button:hover {
@@ -110,6 +159,20 @@ main {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
 }
 
 /* Stat Cards */
@@ -159,13 +222,13 @@ main {
 /* Ejercicios para hoy */
 .ejercicios-hoy-section {
     background-color: #ffffff;
-    padding: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .ejercicios-hoy-title {
-    font-size: 1.25rem;
+    font-size: clamp(1.1rem, 3vw, 1.25rem);
     font-weight: 600;
     margin-bottom: 1rem;
 }
@@ -183,6 +246,26 @@ main {
     padding: 0.75rem;
     background-color: #f9fafb;
     border-radius: 0.25rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .ejercicio-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem;
+    }
+
+    .ejercicio-info {
+        width: 100%;
+    }
+
+    .ejercicio-priority-badge {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.65rem;
+        align-self: flex-start;
+    }
 }
 
 .ejercicio-info {
@@ -248,9 +331,15 @@ main {
 
 .form-card {
     background-color: #ffffff;
-    padding: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+@media (max-width: 480px) {
+    .form-card {
+        padding: 1rem;
+    }
 }
 
 .form-group {
@@ -261,6 +350,20 @@ main {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-grid-2col {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-grid-2col {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
 }
 
 .form-label {
@@ -279,7 +382,16 @@ main {
     border: 1px solid #e5e7eb;
     border-radius: 0.25rem;
     font-family: 'Quicksand', sans-serif;
-    font-size: 0.875rem;
+    font-size: clamp(0.8rem, 2vw, 0.875rem);
+}
+
+@media (max-width: 480px) {
+    .form-input,
+    .form-textarea,
+    .form-select {
+        font-size: 16px; /* Previene zoom en iPhone */
+        padding: 0.6rem;
+    }
 }
 
 .form-input:focus,
@@ -328,6 +440,19 @@ main {
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
+    flex-direction: row;
+}
+
+@media (max-width: 480px) {
+    .form-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
 }
 
 .btn-primary {
@@ -375,11 +500,24 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .resolver-title {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
     font-weight: 700;
+}
+
+@media (max-width: 480px) {
+    .resolver-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .resolver-counter {
+        width: 100%;
+    }
 }
 
 .resolver-counter {
@@ -388,9 +526,15 @@ main {
 
 .ejercicio-card {
     background-color: #ffffff;
-    padding: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+@media (max-width: 480px) {
+    .ejercicio-card {
+        padding: 0.75rem;
+    }
 }
 
 .ejercicio-meta {
@@ -407,12 +551,19 @@ main {
 
 .ejercicio-imagen {
     margin: 1rem 0;
-    max-height: 20rem;
+    max-height: clamp(15rem, 50vw, 20rem);
     border-radius: 0.25rem;
     border: 1px solid #e5e7eb;
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+@media (max-width: 480px) {
+    .ejercicio-imagen {
+        max-height: 12rem;
+        margin: 0.75rem 0;
+    }
 }
 
 /* Opciones */
@@ -426,13 +577,25 @@ main {
 .option-button {
     width: 100%;
     text-align: left;
-    padding: 0.75rem;
+    padding: clamp(0.5rem, 2vw, 0.75rem);
     border: 2px solid #e5e7eb;
     border-radius: 0.25rem;
     background-color: #f9fafb;
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Quicksand', sans-serif;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
+}
+
+@media (max-width: 480px) {
+    .option-button {
+        padding: 0.6rem;
+        font-size: 0.875rem;
+    }
+
+    .opciones-list {
+        gap: 0.4rem;
+    }
 }
 
 .option-button:hover:not(:disabled) {
@@ -478,17 +641,32 @@ main {
 .confianza-buttons {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .confianza-btn {
     flex: 1;
-    padding: 0.5rem;
+    min-width: 80px;
+    padding: clamp(0.4rem, 2vw, 0.5rem);
     border-radius: 0.25rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
     background-color: #f3f4f6;
+    font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+}
+
+@media (max-width: 480px) {
+    .confianza-buttons {
+        gap: 0.35rem;
+    }
+
+    .confianza-btn {
+        min-width: 70px;
+        padding: 0.4rem 0.3rem;
+        font-size: 0.75rem;
+    }
 }
 
 .confianza-btn.active {
@@ -501,12 +679,20 @@ main {
     width: 100%;
     background-color: #2563eb;
     color: #ffffff;
-    padding: 0.75rem;
+    padding: clamp(0.5rem, 2vw, 0.75rem);
     border-radius: 0.5rem;
     border: none;
     cursor: pointer;
     font-weight: 600;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
     transition: background-color 0.3s ease;
+}
+
+@media (max-width: 480px) {
+    .btn-verificar {
+        padding: 0.6rem;
+        font-size: 0.875rem;
+    }
 }
 
 .btn-verificar:hover:not(:disabled) {
@@ -545,12 +731,20 @@ main {
     width: 100%;
     background-color: #2563eb;
     color: #ffffff;
-    padding: 0.75rem;
+    padding: clamp(0.5rem, 2vw, 0.75rem);
     border-radius: 0.5rem;
     border: none;
     cursor: pointer;
     font-weight: 600;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
     transition: background-color 0.3s ease;
+}
+
+@media (max-width: 480px) {
+    .btn-siguiente {
+        padding: 0.6rem;
+        font-size: 0.875rem;
+    }
 }
 
 .btn-siguiente:hover {
