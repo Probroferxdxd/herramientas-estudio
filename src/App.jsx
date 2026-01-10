@@ -18,9 +18,9 @@ export default function App() {
         <div className="container">
             <Routes>
                 <Route path="/" index element={<Home />} />
-                <Route path="about" element={<FlashCards />} />
-                <Route path="recall-app" element={<RecallApp />} />
-                <Route path="*" element={<h1>404 - No encontrado</h1>} /> {/* Ruta para no encontradas */}
+                <Route path="/about" element={<FlashCards />} />
+                <Route path="/recall-app" element={<RecallApp />} />
+                <Route path="*" element={<h1>404 - No encontrado g</h1>} /> {/* Ruta para no encontradas */}
             </Routes>
         </div>
     );

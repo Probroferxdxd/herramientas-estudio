@@ -7,7 +7,7 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <BrowserRouter> {/* Envuelve tu App */}
+        <BrowserRouter basename="/herramientas-estudio"> {/* Envuelve tu App */}
             <App />
         </BrowserRouter>
     </React.StrictMode>,
