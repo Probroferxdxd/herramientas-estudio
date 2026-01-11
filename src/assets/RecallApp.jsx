@@ -197,7 +197,13 @@ function IngresarEjercicio() {
         tema: '',
         enunciado: '',
         tipo: 'opcion_multiple',
-        opciones: ['', '', '', '', ''],
+        opciones: [
+            { texto: '', imagen: null },
+            { texto: '', imagen: null },
+            { texto: '', imagen: null },
+            { texto: '', imagen: null },
+            { texto: '', imagen: null }
+        ],
         respuestaCorrecta: '',
         fuente: '',
         dificultadPercibida: 3,
@@ -216,7 +222,13 @@ function IngresarEjercicio() {
             tema: '',
             enunciado: '',
             tipo: 'opcion_multiple',
-            opciones: ['', '', '', '', ''],
+            opciones: [
+                { texto: '', imagen: null },
+                { texto: '', imagen: null },
+                { texto: '', imagen: null },
+                { texto: '', imagen: null },
+                { texto: '', imagen: null }
+            ],
             respuestaCorrecta: '',
             fuente: '',
             dificultadPercibida: 3,
@@ -238,6 +250,25 @@ function IngresarEjercicio() {
 
     const handleRemoveImage = () => {
         setForm({ ...form, imagen: null });
+    };
+
+    const handleOpcionImagen = (indice, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const newOps = [...form.opciones];
+            newOps[indice] = { ...newOps[indice], imagen: reader.result };
+            setForm({ ...form, opciones: newOps });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveOpcionImage = (indice) => {
+        const newOps = [...form.opciones];
+        newOps[indice] = { ...newOps[indice], imagen: null };
+        setForm({ ...form, opciones: newOps });
     };
 
     return (
@@ -281,18 +312,47 @@ function IngresarEjercicio() {
                 <div className="form-group opciones-container">
                     <label className="form-label">Opciones (A-E)</label>
                     {form.opciones.map((op, i) => (
-                        <input
-                            key={i}
-                            type="text"
-                            value={op}
-                            onChange={(e) => {
-                                const newOps = [...form.opciones];
-                                newOps[i] = e.target.value;
-                                setForm({...form, opciones: newOps});
-                            }}
-                            placeholder={`Opción ${String.fromCharCode(65 + i)}`}
-                            className="form-input opcion-input"
-                        />
+                        <div key={i} className="opcion-item">
+                            <div className="opcion-text-input">
+                                <input
+                                    type="text"
+                                    value={op.texto}
+                                    onChange={(e) => {
+                                        const newOps = [...form.opciones];
+                                        newOps[i] = { ...newOps[i], texto: e.target.value };
+                                        setForm({...form, opciones: newOps});
+                                    }}
+                                    placeholder={`Opción ${String.fromCharCode(65 + i)}`}
+                                    className="form-input opcion-input"
+                                />
+                            </div>
+                            <div className="opcion-image-upload">
+                                <label htmlFor={`opcion-file-${i}`} className="opcion-image-label">
+                                    <span className="opcion-image-icon">🖼️</span>
+                                    <span className="opcion-image-text">Imagen</span>
+                                </label>
+                                <input
+                                    id={`opcion-file-${i}`}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleOpcionImagen(i, e)}
+                                    className="file-input-hidden"
+                                />
+                                {op.imagen && (
+                                    <div className="opcion-image-preview">
+                                        <img src={op.imagen} alt={`Opción ${String.fromCharCode(65 + i)}`} />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveOpcionImage(i)}
+                                            className="opcion-image-remove"
+                                            title="Eliminar imagen"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     ))}
                 </div>
 
@@ -484,7 +544,15 @@ function ResolverEjercicio() {
                                 disabled={mostrarResultado}
                                 className={btnClass}
                             >
-                                <strong>{letra})</strong> {opcion}
+                                <div className="option-content">
+                                    <strong>{letra})</strong>
+                                    <div className="option-text-image">
+                                        <span>{typeof opcion === 'string' ? opcion : opcion.texto}</span>
+                                        {opcion.imagen && (
+                                            <img src={opcion.imagen} alt={`Opción ${letra}`} className="option-image" />
+                                        )}
+                                    </div>
+                                </div>
                             </button>
                         );
                     })}
