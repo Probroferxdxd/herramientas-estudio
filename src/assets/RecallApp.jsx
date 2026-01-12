@@ -99,6 +99,16 @@ function EjerciciosProvider({ children }) {
             .slice(0, 20);
     };
 
+    const eliminarEjercicio = (id) => {
+        setEjercicios(ejercicios.filter(ej => ej.id !== id));
+    };
+
+    const actualizarEjercicio = (id, datosActualizados) => {
+        setEjercicios(ejercicios.map(ej => 
+            ej.id === id ? { ...ej, ...datosActualizados } : ej
+        ));
+    };
+
     return (
         <EjerciciosContext.Provider value={{
             ejercicios,
@@ -106,7 +116,9 @@ function EjerciciosProvider({ children }) {
             setVistaActual,
             agregarEjercicio,
             registrarIntento,
-            obtenerEjerciciosHoy
+            obtenerEjerciciosHoy,
+            eliminarEjercicio,
+            actualizarEjercicio
         }}>
             <div className="recall-app-container">
                 {children}
@@ -609,13 +621,199 @@ function ResolverEjercicio() {
     );
 }
 
+function GestionarEjercicios() {
+    const { ejercicios, eliminarEjercicio, actualizarEjercicio, setVistaActual } = useEjercicios();
+    const [filtro, setFiltro] = useState('todos');
+    const [ejercicioEditando, setEjercicioEditando] = useState(null);
+    const [formEdicion, setFormEdicion] = useState({});
+
+    const ejerciciosFiltrados = ejercicios.filter(ej => {
+        if (filtro === 'todos') return true;
+        return ej.curso === filtro;
+    });
+
+    const cursos = [...new Set(ejercicios.map(ej => ej.curso))];
+
+    const handleEditar = (ejercicio) => {
+        setEjercicioEditando(ejercicio.id);
+        setFormEdicion({ ...ejercicio });
+    };
+
+    const handleGuardarEdicion = () => {
+        actualizarEjercicio(ejercicioEditando, formEdicion);
+        setEjercicioEditando(null);
+        setFormEdicion({});
+        alert('Ejercicio actualizado correctamente');
+    };
+
+    const handleCancelarEdicion = () => {
+        setEjercicioEditando(null);
+        setFormEdicion({});
+    };
+
+    const handleEliminar = (id) => {
+        if (window.confirm('¿Estás seguro de que quieres eliminar este ejercicio?')) {
+            eliminarEjercicio(id);
+            alert('Ejercicio eliminado correctamente');
+        }
+    };
+
+    return (
+        <div className="gestionar-ejercicios-container">
+            <h1 className="gestionar-title">Gestionar ejercicios</h1>
+
+            <div className="filtro-container">
+                <label className="filtro-label">Filtrar por curso:</label>
+                <select 
+                    value={filtro} 
+                    onChange={(e) => setFiltro(e.target.value)}
+                    className="filtro-select"
+                >
+                    <option value="todos">Todos</option>
+                    {cursos.map(curso => (
+                        <option key={curso} value={curso}>{curso}</option>
+                    ))}
+                </select>
+                <p className="total-ejercicios">Total: {ejerciciosFiltrados.length} ejercicios</p>
+            </div>
+
+            {ejerciciosFiltrados.length === 0 ? (
+                <div className="sin-ejercicios">
+                    <p className="sin-ejercicios-texto">No hay ejercicios para mostrar</p>
+                    <button
+                        onClick={() => setVistaActual('ingresar')}
+                        className="btn-primary"
+                    >
+                        Agregar nuevo ejercicio
+                    </button>
+                </div>
+            ) : (
+                <div className="ejercicios-gestion-list">
+                    {ejerciciosFiltrados.map(ej => (
+                        <div 
+                            key={ej.id} 
+                            className={`ejercicio-gestion-card ${ejercicioEditando === ej.id ? 'editando' : ''}`}
+                        >
+                            {ejercicioEditando === ej.id ? (
+                                <div className="edicion-form">
+                                    <div className="form-group">
+                                        <label className="form-label">Curso</label>
+                                        <input
+                                            type="text"
+                                            value={formEdicion.curso}
+                                            onChange={(e) => setFormEdicion({...formEdicion, curso: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Tema</label>
+                                        <input
+                                            type="text"
+                                            value={formEdicion.tema}
+                                            onChange={(e) => setFormEdicion({...formEdicion, tema: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Enunciado</label>
+                                        <textarea
+                                            value={formEdicion.enunciado}
+                                            onChange={(e) => setFormEdicion({...formEdicion, enunciado: e.target.value})}
+                                            className="form-textarea"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Respuesta correcta</label>
+                                        <select
+                                            value={formEdicion.respuestaCorrecta}
+                                            onChange={(e) => setFormEdicion({...formEdicion, respuestaCorrecta: e.target.value})}
+                                            className="form-select"
+                                        >
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="edicion-buttons">
+                                        <button
+                                            onClick={handleGuardarEdicion}
+                                            className="btn-primary"
+                                        >
+                                            Guardar cambios
+                                        </button>
+                                        <button
+                                            onClick={handleCancelarEdicion}
+                                            className="btn-secondary"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="ejercicio-gestion-content">
+                                    <div className="ejercicio-gestion-header">
+                                        <div className="ejercicio-gestion-info">
+                                            <p className="ejercicio-gestion-meta">{ej.curso} • {ej.tema}</p>
+                                            <p className="ejercicio-gestion-enunciado">{ej.enunciado.substring(0, 80)}{ej.enunciado.length > 80 ? '...' : ''}</p>
+                                        </div>
+                                        <div className="ejercicio-gestion-stats">
+                                            <span className="stat-badge">Intentos: {ej.historial.length}</span>
+                                            <span className={`stat-badge ${ej.algoritmo.repeticiones >= 3 ? 'dominado' : ''}`}>
+                                                Repeticiones: {ej.algoritmo.repeticiones}
+                                            </span>
+                                            <span className="stat-badge">Próximo: {ej.algoritmo.proximoRepaso}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="ejercicio-gestion-buttons">
+                                        <button
+                                            onClick={() => handleEditar(ej)}
+                                            className="btn-editar"
+                                            title="Editar ejercicio"
+                                        >
+                                            ✏️ Editar
+                                        </button>
+                                        <button
+                                            onClick={() => handleEliminar(ej.id)}
+                                            className="btn-eliminar"
+                                            title="Eliminar ejercicio"
+                                        >
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="form-buttons" style={{ marginTop: '2rem' }}>
+                <button
+                    onClick={() => setVistaActual('dashboard')}
+                    className="btn-secondary"
+                >
+                    Volver al dashboard
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function Navigation() {
     const { vistaActual, setVistaActual } = useEjercicios();
 
     const botones = [
         { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
         { id: 'ingresar', label: 'Nuevo ejercicio', icon: PlusCircle },
-        { id: 'resolver', label: 'Repasar', icon: Brain }
+        { id: 'resolver', label: 'Repasar', icon: Brain },
+        { id: 'gestionar', label: 'Gestionar', icon: BookOpen }
     ];
 
     return (
@@ -693,6 +891,7 @@ function RenderVista() {
         case 'dashboard': return <Dashboard />;
         case 'ingresar': return <IngresarEjercicio />;
         case 'resolver': return <ResolverEjercicio />;
+        case 'gestionar': return <GestionarEjercicios />;
         default: return <Dashboard />;
     }
 }
