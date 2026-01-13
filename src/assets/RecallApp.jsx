@@ -246,6 +246,7 @@ function IngresarEjercicio() {
     });
 
     // Valida que estén completos los campos obligatorios y guarda el ejercicio
+    const handleSubmit = () => {
         if (!form.curso || !form.tema || !form.enunciado || !form.respuestaCorrecta) {
             alert('Por favor completa los campos obligatorios');
             return;
