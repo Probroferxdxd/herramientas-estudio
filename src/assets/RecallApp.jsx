@@ -5,13 +5,16 @@ import "../index.css"
 import "../styles/RecallApp.css"
 
 // ============ CONTEXT ============
+// Contexto de React para compartir estado global de ejercicios entre componentes
 const EjerciciosContext = createContext();
 
+// Proveedor de contexto: centraliza lógica de gestión de ejercicios
+// Maneja persistencia en localStorage y algoritmo de repaso espaciado (SM-2)
 function EjerciciosProvider({ children }) {
-    const [ejercicios, setEjercicios] = useState([]);
-    const [vistaActual, setVistaActual] = useState('dashboard');
+    const [ejercicios, setEjercicios] = useState([]); // Lista completa de ejercicios
+    const [vistaActual, setVistaActual] = useState('dashboard'); // Vista actualmente mostrada
 
-    // Cargar desde localStorage
+    // Al montar: carga los ejercicios guardados en localStorage
     useEffect(() => {
         const stored = localStorage.getItem('flask-ejercicios');
         if (stored) {
@@ -19,66 +22,76 @@ function EjerciciosProvider({ children }) {
         }
     }, []);
 
-    // Guardar en localStorage
+    // Guarda en localStorage cada vez que la lista de ejercicios cambia
+    // Permite que los datos persistan entre sesiones del navegador
     useEffect(() => {
         if (ejercicios.length > 0) {
             localStorage.setItem('flask-ejercicios', JSON.stringify(ejercicios));
         }
     }, [ejercicios]);
 
+    // Agrega un nuevo ejercicio inicializando el algoritmo de repetición espaciada
     const agregarEjercicio = (nuevoEjercicio) => {
         const ejercicio = {
             ...nuevoEjercicio,
-            id: Date.now().toString(),
-            historial: [],
+            id: Date.now().toString(), // ID único basado en timestamp
+            historial: [], // Registro de todos los intentos del usuario
+            // Algoritmo SM-2 para optimizar retención mediante repetición espaciada
             algoritmo: {
-                intervalo: 1,
-                facilidad: 2.5,
-                repeticiones: 0,
-                proximoRepaso: new Date().toISOString().split('T')[0],
-                prioridad: 5
+                intervalo: 1, // Días hasta el próximo repaso
+                facilidad: 2.5, // Factor de dificultad (aumenta si responde bien)
+                repeticiones: 0, // Cuántas veces lo ha respondido correctamente seguidas
+                proximoRepaso: new Date().toISOString().split('T')[0], // Fecha del próximo repaso
+                prioridad: 5 // Urgencia (1-10, más alto = más urgente)
             }
         };
         setEjercicios([...ejercicios, ejercicio]);
     };
 
+    // Registra un intento de respuesta y ajusta el algoritmo SM-2
     const registrarIntento = (id, respuesta, confianza) => {
         setEjercicios(ejercicios.map(ej => {
             if (ej.id !== id) return ej;
 
+            // Verifica si la respuesta es correcta
             const correcta = respuesta === ej.respuestaCorrecta;
+            // Crea registro del intento con metadatos
             const nuevoIntento = {
                 fecha: new Date().toISOString(),
                 respuestaUsuario: respuesta,
                 correcta,
-                nivelConfianza: confianza
+                nivelConfianza: confianza // bajo/medio/alto - confianza del usuario
             };
 
+            // Añade intento al historial
             const historial = [...ej.historial, nuevoIntento];
 
-            // Calcular próximo repaso
+            // Ajusta parámetros del algoritmo SM-2 según la respuesta
             let { intervalo, facilidad, repeticiones } = ej.algoritmo;
 
+            // Si responde bien con alta confianza: aumenta facilidad y repeticiones
+            // Si falla: resetea progreso y reduce facilidad
             if (correcta && confianza === 'alto') {
-                facilidad += 0.1;
-                repeticiones++;
+                facilidad += 0.1; // Aumenta factor (intervalo más largo)
+                repeticiones++; // Suma acierto
             } else if (!correcta) {
-                facilidad = Math.max(1.3, facilidad - 0.2);
-                repeticiones = 0;
+                facilidad = Math.max(1.3, facilidad - 0.2); // Penaliza (mínimo 1.3)
+                repeticiones = 0; // Reinicia contador
             }
 
+            // Calcula nuevo intervalo: aumenta exponencialmente con aciertos
             if (repeticiones === 0) {
-                intervalo = 1;
+                intervalo = 1; // Primer intento: 1 día
             } else if (repeticiones === 1) {
-                intervalo = 6;
+                intervalo = 6; // Segundo intento: 6 días
             } else {
-                intervalo = Math.round(intervalo * facilidad);
+                intervalo = Math.round(intervalo * facilidad); // Siguiente: intervalo × facilidad
             }
 
-            // Prioridad por errores recientes
+            // Si ha fallado 2+ veces recientemente: prioridad máxima
             const erroresRecientes = historial.slice(-3).filter(h => !h.correcta).length;
             const prioridad = erroresRecientes >= 2 ? 10 : 5;
-            if (erroresRecientes >= 2) intervalo = Math.min(intervalo, 2);
+            if (erroresRecientes >= 2) intervalo = Math.min(intervalo, 2); // Fuerza revisión en 2 días
 
             const proximoRepaso = new Date(Date.now() + intervalo * 24 * 60 * 60 * 1000)
                 .toISOString().split('T')[0];
@@ -91,18 +104,21 @@ function EjerciciosProvider({ children }) {
         }));
     };
 
+    // Obtiene ejercicios pendientes para hoy, ordenados por prioridad (máx 20)
     const obtenerEjerciciosHoy = () => {
         const hoy = new Date().toISOString().split('T')[0];
         return ejercicios
-            .filter(ej => ej.algoritmo.proximoRepaso <= hoy)
-            .sort((a, b) => b.algoritmo.prioridad - a.algoritmo.prioridad)
-            .slice(0, 20);
+            .filter(ej => ej.algoritmo.proximoRepaso <= hoy) // Solo los vencidos
+            .sort((a, b) => b.algoritmo.prioridad - a.algoritmo.prioridad) // Ordena por urgencia
+            .slice(0, 20); // Máximo 20 para evitar sobrecarga
     };
 
+    // Elimina un ejercicio por ID
     const eliminarEjercicio = (id) => {
         setEjercicios(ejercicios.filter(ej => ej.id !== id));
     };
 
+    // Actualiza los datos de un ejercicio (usado en la vista de gestión)
     const actualizarEjercicio = (id, datosActualizados) => {
         setEjercicios(ejercicios.map(ej => 
             ej.id === id ? { ...ej, ...datosActualizados } : ej
@@ -127,19 +143,23 @@ function EjerciciosProvider({ children }) {
     );
 }
 
+// Hook personalizado: permite acceder al contexto desde cualquier componente
 const useEjercicios = () => useContext(EjerciciosContext);
 
 // ============ COMPONENTES ============
+// Diferentes vistas y componentes de la aplicación
 
+// VISTA 1: DASHBOARD - Muestra estadísticas generales y ejercicios pendientes
 function Dashboard() {
     const { ejercicios, obtenerEjerciciosHoy, setVistaActual } = useEjercicios();
     const ejerciciosHoy = obtenerEjerciciosHoy();
 
+    // Calcula estadísticas para mostrar en tarjetas del dashboard
     const stats = {
-        total: ejercicios.length,
-        pendientes: ejerciciosHoy.length,
-        dominados: ejercicios.filter(ej => ej.algoritmo.repeticiones >= 3).length,
-        tasaAcierto: ejercicios.length > 0
+        total: ejercicios.length, // Total de ejercicios creados
+        pendientes: ejerciciosHoy.length, // Ejercicios pendientes para hoy
+        dominados: ejercicios.filter(ej => ej.algoritmo.repeticiones >= 3).length, // 3+ aciertos consecutivos
+        tasaAcierto: ejercicios.length > 0 // Porcentaje global de aciertos
             ? Math.round(ejercicios.reduce((acc, ej) => {
                 const aciertos = ej.historial.filter(h => h.correcta).length;
                 return acc + (ej.historial.length > 0 ? aciertos / ej.historial.length : 0);
@@ -191,6 +211,7 @@ function Dashboard() {
 }
 
 function StatCard({ icon: Icon, label, value, color }) {
+    // Componente reutilizable para mostrar estadísticas con icono
     return (
         <div className={`stat-card ${color}`}>
             <div className="stat-card-icon-container">
@@ -203,6 +224,8 @@ function StatCard({ icon: Icon, label, value, color }) {
 }
 
 function IngresarEjercicio() {
+    // VISTA 2: Formulario para agregar nuevos ejercicios
+    // Permite capturar: curso, tema, enunciado, opciones, imagen, etc.
     const { agregarEjercicio, setVistaActual } = useEjercicios();
     const [form, setForm] = useState({
         curso: '',
@@ -222,8 +245,7 @@ function IngresarEjercicio() {
         imagen: null
     });
 
-
-    const handleSubmit = () => {
+    // Valida que estén completos los campos obligatorios y guarda el ejercicio
         if (!form.curso || !form.tema || !form.enunciado || !form.respuestaCorrecta) {
             alert('Por favor completa los campos obligatorios');
             return;
@@ -250,6 +272,7 @@ function IngresarEjercicio() {
     };
 
     const handleImagen = (e) => {
+        // Carga imagen del enunciado convertida a base64
         const file = e.target.files[0];
         if (!file) return;
 
@@ -261,10 +284,12 @@ function IngresarEjercicio() {
     };
 
     const handleRemoveImage = () => {
+        // Elimina la imagen del enunciado
         setForm({ ...form, imagen: null });
     };
 
     const handleOpcionImagen = (indice, e) => {
+        // Carga imagen para una opción específica
         const file = e.target.files[0];
         if (!file) return;
 
@@ -278,6 +303,7 @@ function IngresarEjercicio() {
     };
 
     const handleRemoveOpcionImage = (indice) => {
+        // Elimina la imagen de una opción
         const newOps = [...form.opciones];
         newOps[indice] = { ...newOps[indice], imagen: null };
         setForm({ ...form, opciones: newOps });
@@ -469,6 +495,8 @@ function IngresarEjercicio() {
 }
 
 function ResolverEjercicio() {
+    // VISTA 3: Interfaz para resolver ejercicios del día
+    // Muestra ejercicios pendientes, captura respuesta y confianza del usuario
     const { obtenerEjerciciosHoy, registrarIntento, setVistaActual } = useEjercicios();
     const ejerciciosHoy = obtenerEjerciciosHoy();
     const [indiceActual, setIndiceActual] = useState(0);
@@ -476,6 +504,7 @@ function ResolverEjercicio() {
     const [confianza, setConfianza] = useState('medio');
     const [mostrarResultado, setMostrarResultado] = useState(false);
 
+    // Si no hay ejercicios pendientes, muestra mensaje
     if (ejerciciosHoy.length === 0) {
         return (
             <div className="sin-ejercicios">
@@ -492,25 +521,30 @@ function ResolverEjercicio() {
 
     const ejercicioActual = ejerciciosHoy[indiceActual];
 
+    // Valida respuesta y muestra el resultado
     const handleSubmit = () => {
         if (!respuestaSeleccionada) return;
         setMostrarResultado(true);
     };
 
+    // Registra el intento y avanza al siguiente ejercicio
     const handleSiguiente = () => {
         registrarIntento(ejercicioActual.id, respuestaSeleccionada, confianza);
 
         if (indiceActual < ejerciciosHoy.length - 1) {
+            // Reinicia estado para siguiente ejercicio
             setIndiceActual(indiceActual + 1);
             setRespuestaSeleccionada('');
             setConfianza('medio');
             setMostrarResultado(false);
         } else {
+            // Completa el repaso
             alert('¡Repaso completado! 🎉');
             setVistaActual('dashboard');
         }
     };
 
+    // Determina si la respuesta fue correcta
     const esCorrecta = respuestaSeleccionada === ejercicioActual.respuestaCorrecta;
 
     return (
@@ -622,23 +656,29 @@ function ResolverEjercicio() {
 }
 
 function GestionarEjercicios() {
+    // VISTA 4: Interfaz para gestionar ejercicios (editar/eliminar)
+    // Permite filtrar por curso y modificar los ejercicios creados
     const { ejercicios, eliminarEjercicio, actualizarEjercicio, setVistaActual } = useEjercicios();
     const [filtro, setFiltro] = useState('todos');
     const [ejercicioEditando, setEjercicioEditando] = useState(null);
     const [formEdicion, setFormEdicion] = useState({});
 
+    // Filtra ejercicios según el curso seleccionado
     const ejerciciosFiltrados = ejercicios.filter(ej => {
         if (filtro === 'todos') return true;
         return ej.curso === filtro;
     });
 
+    // Obtiene lista única de cursos para el filtro
     const cursos = [...new Set(ejercicios.map(ej => ej.curso))];
 
+    // Inicia modo edición para un ejercicio
     const handleEditar = (ejercicio) => {
         setEjercicioEditando(ejercicio.id);
         setFormEdicion({ ...ejercicio });
     };
 
+    // Guarda los cambios del ejercicio editado
     const handleGuardarEdicion = () => {
         actualizarEjercicio(ejercicioEditando, formEdicion);
         setEjercicioEditando(null);
@@ -646,11 +686,13 @@ function GestionarEjercicios() {
         alert('Ejercicio actualizado correctamente');
     };
 
+    // Cancela la edición actual
     const handleCancelarEdicion = () => {
         setEjercicioEditando(null);
         setFormEdicion({});
     };
 
+    // Elimina un ejercicio previa confirmación
     const handleEliminar = (id) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este ejercicio?')) {
             eliminarEjercicio(id);
@@ -807,6 +849,7 @@ function GestionarEjercicios() {
 }
 
 function Navigation() {
+    // Componente de navegación: botones para cambiar entre vistas
     const { vistaActual, setVistaActual } = useEjercicios();
 
     const botones = [
@@ -855,6 +898,7 @@ function Navigation() {
 }
 
 // ============ APP PRINCIPAL ============
+// Componente raíz: envuelve todo con el proveedor de contexto
 function App() {
     return (
         <EjerciciosProvider>
@@ -877,6 +921,7 @@ function App() {
 }
 
 export default function RecallApp() {
+    // Componente de exportación final: envuelve en ToolTemplate
     return(
         <ToolTemplate className={"recall-app"}>
             <App />
@@ -885,6 +930,7 @@ export default function RecallApp() {
 }
 
 function RenderVista() {
+    // Componente de enrutamiento: muestra la vista correcta según vistaActual
     const { vistaActual } = useEjercicios();
 
     switch (vistaActual) {
