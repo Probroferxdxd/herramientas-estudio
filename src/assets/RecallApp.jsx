@@ -48,6 +48,28 @@ function EjerciciosProvider({ children }) {
     const cargarEjerciciosDelUsuario = async (uid) => {
         try {
             const ejerciciosFirebase = await fbGetEjercicios(uid);
+            
+            // Si Firestore está vacío pero localStorage tiene datos, sincronizar
+            if (ejerciciosFirebase.length === 0) {
+                const stored = localStorage.getItem('flask-ejercicios');
+                if (stored) {
+                    console.log('Migrando datos de localStorage a Firestore...');
+                    const datosLocales = JSON.parse(stored);
+                    setEjercicios(datosLocales);
+                    
+                    // Guardar cada ejercicio en Firestore
+                    for (const ejercicio of datosLocales) {
+                        try {
+                            await fbAddEjercicio(uid, ejercicio);
+                        } catch (error) {
+                            console.error('Error migrando ejercicio:', error);
+                        }
+                    }
+                    console.log('✅ Datos migrados a Firestore');
+                    return;
+                }
+            }
+            
             setEjercicios(ejerciciosFirebase);
             // También guardar en localStorage como backup
             localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
