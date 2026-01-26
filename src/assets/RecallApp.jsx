@@ -52,7 +52,11 @@ function EjerciciosProvider({ children }) {
             await sincronizarTodosLosData(uid);
             
             // Luego carga los datos de Firestore
-            const ejerciciosFirebase = await fbGetEjercicios(uid);
+            let ejerciciosFirebase = await fbGetEjercicios(uid);
+            
+            // Normalizar todos los ejercicios para asegurar estructura correcta
+            ejerciciosFirebase = ejerciciosFirebase.map(ej => normalizarEjercicio(ej));
+            
             setEjercicios(ejerciciosFirebase);
             
             // Guardar en localStorage como backup
@@ -62,7 +66,12 @@ function EjerciciosProvider({ children }) {
             console.error('Error cargando ejercicios:', error);
             // Fallback a localStorage si hay error
             const stored = localStorage.getItem('flask-ejercicios');
-            if (stored) setEjercicios(JSON.parse(stored));
+            if (stored) {
+                let datosLocales = JSON.parse(stored);
+                // Normalizar datos locales también
+                datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
+                setEjercicios(datosLocales);
+            }
         }
     };
 
@@ -73,6 +82,22 @@ function EjerciciosProvider({ children }) {
             localStorage.setItem('flask-ejercicios', JSON.stringify(ejercicios));
         }
     }, [ejercicios]);
+
+    // Normaliza un ejercicio para asegurar que tenga la estructura correcta
+    const normalizarEjercicio = (ej) => {
+        if (!ej.algoritmo) {
+            ej.algoritmo = {
+                intervalo: 1,
+                facilidad: 2.5,
+                repeticiones: 0,
+                proximoRepaso: new Date().toISOString().split('T')[0],
+                prioridad: 5
+            };
+        }
+        if (!ej.historial) ej.historial = [];
+        if (!ej.id) ej.id = Date.now().toString();
+        return ej;
+    };
 
     // Agrega un nuevo ejercicio inicializando el algoritmo de repetición espaciada
     const agregarEjercicio = async (nuevoEjercicio) => {
@@ -173,8 +198,8 @@ function EjerciciosProvider({ children }) {
     const obtenerEjerciciosHoy = () => {
         const hoy = new Date().toISOString().split('T')[0];
         return ejercicios
-            .filter(ej => ej.algoritmo.proximoRepaso <= hoy) // Solo los vencidos
-            .sort((a, b) => b.algoritmo.prioridad - a.algoritmo.prioridad) // Ordena por urgencia
+            .filter(ej => ej.algoritmo && ej.algoritmo.proximoRepaso && ej.algoritmo.proximoRepaso <= hoy) // Solo los vencidos con estructura correcta
+            .sort((a, b) => (b.algoritmo?.prioridad || 0) - (a.algoritmo?.prioridad || 0)) // Ordena por urgencia
             .slice(0, 20); // Máximo 20 para evitar sobrecarga
     };
 
