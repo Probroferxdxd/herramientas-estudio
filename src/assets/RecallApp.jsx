@@ -7,7 +7,8 @@ import {
   getEjercicios as fbGetEjercicios,
   deleteEjercicio as fbDeleteEjercicio,
   updateProgreso,
-  sincronizarTodosLosData
+  sincronizarTodosLosData,
+  restaurarDesdeFirestore
 } from '../config/firestore';
 import ToolTemplate from "../template/ToolTemplate.jsx";
 import "../index.css"
@@ -48,27 +49,36 @@ function EjerciciosProvider({ children }) {
     // Cargar ejercicios del usuario desde Firestore
     const cargarEjerciciosDelUsuario = async (uid) => {
         try {
-            // Primero sincroniza cualquier dato local a Firestore
+            // Primero sincroniza datos locales a Firestore solo si está vacío
             await sincronizarTodosLosData(uid);
             
             // Luego carga los datos de Firestore
             let ejerciciosFirebase = await fbGetEjercicios(uid);
             
-            // Normalizar todos los ejercicios para asegurar estructura correcta
-            ejerciciosFirebase = ejerciciosFirebase.map(ej => normalizarEjercicio(ej));
-            
-            setEjercicios(ejerciciosFirebase);
-            
-            // Guardar en localStorage como backup
-            localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
-            console.log('✅ Datos sincronizados y cargados correctamente');
+            // Si Firestore tiene datos, restaurar a localStorage
+            if (ejerciciosFirebase && ejerciciosFirebase.length > 0) {
+                // Normalizar todos los ejercicios
+                ejerciciosFirebase = ejerciciosFirebase.map(ej => normalizarEjercicio(ej));
+                setEjercicios(ejerciciosFirebase);
+                // Actualizar localStorage con datos de Firestore (source of truth)
+                localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
+                console.log('✅ Datos cargados desde Firestore:', ejerciciosFirebase.length);
+            } else {
+                // Si Firestore está vacío, usar localStorage local
+                const stored = localStorage.getItem('flask-ejercicios');
+                if (stored) {
+                    let datosLocales = JSON.parse(stored);
+                    datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
+                    setEjercicios(datosLocales);
+                    console.log('✅ Usando datos locales:', datosLocales.length);
+                }
+            }
         } catch (error) {
             console.error('Error cargando ejercicios:', error);
             // Fallback a localStorage si hay error
             const stored = localStorage.getItem('flask-ejercicios');
             if (stored) {
                 let datosLocales = JSON.parse(stored);
-                // Normalizar datos locales también
                 datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
                 setEjercicios(datosLocales);
             }

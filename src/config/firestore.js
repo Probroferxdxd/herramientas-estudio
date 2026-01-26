@@ -11,26 +11,69 @@ import {
 // ==================== SINCRONIZACIÓN GENERAL ====================
 
 /**
- * Sincroniza todos los datos del localStorage a Firestore
+ * Sincroniza datos de localStorage a Firestore SOLO si Firestore está vacío
+ * Evita sobrescribir datos importantes
  * @param {string} uid - ID del usuario
  */
 export const sincronizarTodosLosData = async (uid) => {
   try {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+    
+    // Si Firestore ya tiene datos, NO sobrescribir
+    if (userSnap.exists() && userSnap.data().ejercicios && userSnap.data().ejercicios.length > 0) {
+      console.log('✅ Firestore ya tiene datos, no sincronizando');
+      return;
+    }
+    
+    // Solo sincronizar si Firestore está vacío
     const ejercicios = JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
     const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
     const progreso = JSON.parse(localStorage.getItem('progreso')) || {};
 
-    const userRef = doc(db, 'users', uid);
-    await setDoc(userRef, {
-      ejercicios,
-      flashcards,
-      progreso,
-      fechaSincronizacion: new Date().toISOString()
-    }, { merge: true });
-
-    console.log('✅ Datos sincronizados a Firestore');
+    if (ejercicios.length > 0 || Object.keys(flashcards).length > 0) {
+      await setDoc(userRef, {
+        ejercicios,
+        flashcards,
+        progreso,
+        fechaSincronizacion: new Date().toISOString()
+      }, { merge: true });
+      console.log('✅ Datos locales sincronizados a Firestore');
+    }
   } catch (error) {
     console.error('Error sincronizando datos:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fuerza la restauración de datos desde Firestore al localStorage
+ * Sobrescribe localStorage con datos de Firestore (uso en recuperación de emergencia)
+ * @param {string} uid - ID del usuario
+ */
+export const restaurarDesdeFirestore = async (uid) => {
+  try {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const datos = userSnap.data();
+      
+      if (datos.ejercicios) {
+        localStorage.setItem('flask-ejercicios', JSON.stringify(datos.ejercicios));
+        console.log('✅ Ejercicios restaurados desde Firestore:', datos.ejercicios.length);
+      }
+      if (datos.flashcards) {
+        localStorage.setItem('flashcards', JSON.stringify(datos.flashcards));
+      }
+      if (datos.progreso) {
+        localStorage.setItem('progreso', JSON.stringify(datos.progreso));
+      }
+      
+      return datos;
+    }
+  } catch (error) {
+    console.error('Error restaurando datos:', error);
     throw error;
   }
 };
