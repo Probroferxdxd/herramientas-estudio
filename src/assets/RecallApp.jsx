@@ -6,7 +6,8 @@ import {
   addEjercicio as fbAddEjercicio,
   getEjercicios as fbGetEjercicios,
   deleteEjercicio as fbDeleteEjercicio,
-  updateProgreso
+  updateProgreso,
+  sincronizarTodosLosData
 } from '../config/firestore';
 import ToolTemplate from "../template/ToolTemplate.jsx";
 import "../index.css"
@@ -47,32 +48,16 @@ function EjerciciosProvider({ children }) {
     // Cargar ejercicios del usuario desde Firestore
     const cargarEjerciciosDelUsuario = async (uid) => {
         try {
+            // Primero sincroniza cualquier dato local a Firestore
+            await sincronizarTodosLosData(uid);
+            
+            // Luego carga los datos de Firestore
             const ejerciciosFirebase = await fbGetEjercicios(uid);
-            
-            // Si Firestore está vacío pero localStorage tiene datos, sincronizar
-            if (ejerciciosFirebase.length === 0) {
-                const stored = localStorage.getItem('flask-ejercicios');
-                if (stored) {
-                    console.log('Migrando datos de localStorage a Firestore...');
-                    const datosLocales = JSON.parse(stored);
-                    setEjercicios(datosLocales);
-                    
-                    // Guardar cada ejercicio en Firestore
-                    for (const ejercicio of datosLocales) {
-                        try {
-                            await fbAddEjercicio(uid, ejercicio);
-                        } catch (error) {
-                            console.error('Error migrando ejercicio:', error);
-                        }
-                    }
-                    console.log('✅ Datos migrados a Firestore');
-                    return;
-                }
-            }
-            
             setEjercicios(ejerciciosFirebase);
-            // También guardar en localStorage como backup
+            
+            // Guardar en localStorage como backup
             localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
+            console.log('✅ Datos sincronizados y cargados correctamente');
         } catch (error) {
             console.error('Error cargando ejercicios:', error);
             // Fallback a localStorage si hay error
