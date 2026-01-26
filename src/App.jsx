@@ -2,6 +2,7 @@ import {Link, Outlet, Route, Routes} from 'react-router-dom';
 import Home from './assets/Home';
 import FlashCards from './assets/FlashCards.jsx';
 import RecallApp from "./assets/RecallApp.jsx";
+import LoginHeader from './components/LoginHeader';
 
 export function Back() {
     return (
@@ -16,6 +17,7 @@ export function Back() {
 export default function App() {
     return (
         <div className="container">
+            <LoginHeader />
             <Routes>
                 <Route path="/" index element={<Home />} />
                 <Route path="/about" element={<FlashCards />} />

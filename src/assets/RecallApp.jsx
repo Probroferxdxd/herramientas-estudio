@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PlusCircle, Brain, BarChart3, BookOpen, Calendar, TrendingUp } from 'lucide-react';
+import { auth } from '../config/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import {
+  addEjercicio as fbAddEjercicio,
+  getEjercicios as fbGetEjercicios,
+  deleteEjercicio as fbDeleteEjercicio,
+  updateProgreso
+} from '../config/firestore';
 import ToolTemplate from "../template/ToolTemplate.jsx";
 import "../index.css"
 import "../styles/RecallApp.css"
@@ -9,18 +17,47 @@ import "../styles/RecallApp.css"
 const EjerciciosContext = createContext();
 
 // Proveedor de contexto: centraliza lógica de gestión de ejercicios
-// Maneja persistencia en localStorage y algoritmo de repaso espaciado (SM-2)
+// Maneja persistencia en localStorage Y Firebase + algoritmo de repaso espaciado (SM-2)
 function EjerciciosProvider({ children }) {
     const [ejercicios, setEjercicios] = useState([]); // Lista completa de ejercicios
     const [vistaActual, setVistaActual] = useState('dashboard'); // Vista actualmente mostrada
+    const [user, setUser] = useState(null); // Usuario autenticado con Firebase
+    const [cargando, setCargando] = useState(true); // Indica si se están cargando datos
 
-    // Al montar: carga los ejercicios guardados en localStorage
+    // Detectar cambios de autenticación y cargar datos accordingly
     useEffect(() => {
-        const stored = localStorage.getItem('flask-ejercicios');
-        if (stored) {
-            setEjercicios(JSON.parse(stored));
-        }
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                // Si está logueado: cargar datos de Firestore
+                await cargarEjerciciosDelUsuario(currentUser.uid);
+            } else {
+                // Si no está logueado: cargar del localStorage
+                const stored = localStorage.getItem('flask-ejercicios');
+                if (stored) {
+                    setEjercicios(JSON.parse(stored));
+                }
+            }
+            setCargando(false);
+        });
+
+        return () => unsubscribe();
     }, []);
+
+    // Cargar ejercicios del usuario desde Firestore
+    const cargarEjerciciosDelUsuario = async (uid) => {
+        try {
+            const ejerciciosFirebase = await fbGetEjercicios(uid);
+            setEjercicios(ejerciciosFirebase);
+            // También guardar en localStorage como backup
+            localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
+        } catch (error) {
+            console.error('Error cargando ejercicios:', error);
+            // Fallback a localStorage si hay error
+            const stored = localStorage.getItem('flask-ejercicios');
+            if (stored) setEjercicios(JSON.parse(stored));
+        }
+    };
 
     // Guarda en localStorage cada vez que la lista de ejercicios cambia
     // Permite que los datos persistan entre sesiones del navegador
@@ -31,7 +68,7 @@ function EjerciciosProvider({ children }) {
     }, [ejercicios]);
 
     // Agrega un nuevo ejercicio inicializando el algoritmo de repetición espaciada
-    const agregarEjercicio = (nuevoEjercicio) => {
+    const agregarEjercicio = async (nuevoEjercicio) => {
         const ejercicio = {
             ...nuevoEjercicio,
             id: Date.now().toString(), // ID único basado en timestamp
@@ -45,7 +82,19 @@ function EjerciciosProvider({ children }) {
                 prioridad: 5 // Urgencia (1-10, más alto = más urgente)
             }
         };
-        setEjercicios([...ejercicios, ejercicio]);
+
+        // Guardar en localStorage
+        const nuevosEjercicios = [...ejercicios, ejercicio];
+        setEjercicios(nuevosEjercicios);
+
+        // Guardar en Firestore si está logueado
+        if (user) {
+            try {
+                await fbAddEjercicio(user.uid, nuevoEjercicio);
+            } catch (error) {
+                console.error('Error al guardar en Firebase:', error);
+            }
+        }
     };
 
     // Registra un intento de respuesta y ajusta el algoritmo SM-2
@@ -96,6 +145,15 @@ function EjerciciosProvider({ children }) {
             const proximoRepaso = new Date(Date.now() + intervalo * 24 * 60 * 60 * 1000)
                 .toISOString().split('T')[0];
 
+            // Registrar progreso en Firestore si está logueado
+            if (user) {
+                updateProgreso(user.uid, 'ejercicios', {
+                    totalIntentados: historial.length,
+                    totalAcertados: historial.filter(h => h.correcta).length,
+                    ultimoIntento: new Date().toISOString()
+                }).catch(err => console.error('Error al actualizar progreso:', err));
+            }
+
             return {
                 ...ej,
                 historial,
@@ -114,8 +172,17 @@ function EjerciciosProvider({ children }) {
     };
 
     // Elimina un ejercicio por ID
-    const eliminarEjercicio = (id) => {
+    const eliminarEjercicio = async (id) => {
         setEjercicios(ejercicios.filter(ej => ej.id !== id));
+
+        // Eliminar de Firestore si está logueado
+        if (user) {
+            try {
+                await fbDeleteEjercicio(user.uid, id);
+            } catch (error) {
+                console.error('Error al eliminar de Firebase:', error);
+            }
+        }
     };
 
     // Actualiza los datos de un ejercicio (usado en la vista de gestión)
@@ -134,7 +201,9 @@ function EjerciciosProvider({ children }) {
             registrarIntento,
             obtenerEjerciciosHoy,
             eliminarEjercicio,
-            actualizarEjercicio
+            actualizarEjercicio,
+            user,
+            cargando
         }}>
             <div className="recall-app-container">
                 {children}
@@ -151,8 +220,16 @@ const useEjercicios = () => useContext(EjerciciosContext);
 
 // VISTA 1: DASHBOARD - Muestra estadísticas generales y ejercicios pendientes
 function Dashboard() {
-    const { ejercicios, obtenerEjerciciosHoy, setVistaActual } = useEjercicios();
+    const { ejercicios, obtenerEjerciciosHoy, setVistaActual, user, cargando } = useEjercicios();
     const ejerciciosHoy = obtenerEjerciciosHoy();
+
+    if (cargando) {
+        return (
+            <div className="dashboard-container">
+                <p style={{ textAlign: 'center', color: '#6b7280' }}>Cargando datos...</p>
+            </div>
+        );
+    }
 
     // Calcula estadísticas para mostrar en tarjetas del dashboard
     const stats = {
@@ -169,7 +246,14 @@ function Dashboard() {
 
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-title">Dashboard</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h1 className="dashboard-title">Dashboard</h1>
+                {user && (
+                    <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        📱 Sincronizado: {user.email}
+                    </div>
+                )}
+            </div>
 
             <div className="stats-grid">
                 <StatCard icon={BookOpen} label="Total ejercicios" value={stats.total} color="blue" />
@@ -226,7 +310,7 @@ function StatCard({ icon: Icon, label, value, color }) {
 function IngresarEjercicio() {
     // VISTA 2: Formulario para agregar nuevos ejercicios
     // Permite capturar: curso, tema, enunciado, opciones, imagen, etc.
-    const { agregarEjercicio, setVistaActual } = useEjercicios();
+    const { agregarEjercicio, setVistaActual, user } = useEjercicios();
     const [form, setForm] = useState({
         curso: '',
         tema: '',
@@ -269,7 +353,7 @@ function IngresarEjercicio() {
             dificultadPercibida: 3,
             imagen: null
         });
-        alert('¡Ejercicio guardado!');
+        alert(`¡Ejercicio guardado!${user ? ' (Sincronizado con Firebase)' : ''}`);
     };
 
     const handleImagen = (e) => {
