@@ -12,9 +12,10 @@ import {
 
 /**
  * Sincroniza datos de localStorage a Firestore SOLO si tiene sentido
+ * NUNCA sobrescribe Firestore con datos vacíos
+ * - Si Firestore tiene datos → NO sincronizar (Firestore es source of truth)
  * - Si Firestore está vacío y localStorage tiene datos → sincronizar
- * - Si Firestore tiene datos y localStorage está vacío → NO sincronizar (evitar sobrescribir)
- * - Si ambos tienen datos → mantener el que tiene más
+ * - Si ambos están vacíos → no hacer nada
  * @param {string} uid - ID del usuario
  */
 export const sincronizarTodosLosData = async (uid) => {
@@ -26,25 +27,13 @@ export const sincronizarTodosLosData = async (uid) => {
     const flashcardsLocal = JSON.parse(localStorage.getItem('flashcards')) || [];
     const progresoLocal = JSON.parse(localStorage.getItem('progreso')) || {};
     
-    // Si Firestore está vacío y localStorage tiene datos → sincronizar
-    if (userSnap.exists() && userSnap.data().ejercicios) {
-      const ejerciciosFirebase = userSnap.data().ejercicios || [];
-      
-      // Si Firestore tiene datos pero localStorage está vacío → NO sincronizar
-      // Esto evita que un dispositivo con localStorage vacío sobrescriba Firestore
-      if (ejerciciosFirebase.length > 0 && ejerciciosLocal.length === 0) {
-        console.log('✅ localStorage vacío detectado, NO sincronizando para evitar sobrescribir Firestore');
-        return;
-      }
-      
-      // Si ambos tienen datos, mantener los que hay (merge inteligente)
-      if (ejerciciosFirebase.length > 0 && ejerciciosLocal.length > 0) {
-        console.log('✅ Ambos tienen datos, manteniendo existentes');
-        return;
-      }
+    // Si Firestore ya tiene datos, NUNCA sobrescribir
+    if (userSnap.exists() && userSnap.data().ejercicios && userSnap.data().ejercicios.length > 0) {
+      console.log('✅ Firestore tiene datos (source of truth), no sincronizando localStorage vacío');
+      return;
     }
     
-    // Solo sincronizar si localStorage tiene datos
+    // Si Firestore está vacío pero localStorage tiene datos → sincronizar
     if (ejerciciosLocal.length > 0 || Object.keys(flashcardsLocal).length > 0) {
       await setDoc(userRef, {
         ejercicios: ejerciciosLocal,
@@ -52,7 +41,9 @@ export const sincronizarTodosLosData = async (uid) => {
         progreso: progresoLocal,
         fechaSincronizacion: new Date().toISOString()
       }, { merge: true });
-      console.log('✅ Datos locales sincronizados a Firestore');
+      console.log('✅ Datos locales sincronizados a Firestore (Firestore estaba vacío)');
+    } else {
+      console.log('✅ Sin datos para sincronizar (ambos vacíos)');
     }
   } catch (error) {
     console.error('Error sincronizando datos:', error);
@@ -202,15 +193,12 @@ export const addEjercicio = async (uid, ejercicio) => {
 };
 
 /**
- * Obtiene los ejercicios del localStorage y Firestore
+ * Obtiene los ejercicios - Firestore es source of truth cuando hay uid
  * @param {string} uid - ID del usuario (opcional)
  */
 export const getEjercicios = async (uid = null) => {
   try {
-    // Primero intenta del localStorage
-    const ejerciciosLocal = JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
-    
-    // Si hay uid, sincroniza con Firestore
+    // Si hay uid, SIEMPRE obtener de Firestore (es source of truth)
     if (uid) {
       const userRef = doc(db, 'users', uid);
       const userSnap = await getDoc(userRef);
@@ -219,7 +207,8 @@ export const getEjercicios = async (uid = null) => {
       }
     }
     
-    return ejerciciosLocal;
+    // Si no hay uid o Firestore está vacío, usar localStorage
+    return JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
   } catch (error) {
     console.error('Error obteniendo ejercicios:', error);
     return JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
