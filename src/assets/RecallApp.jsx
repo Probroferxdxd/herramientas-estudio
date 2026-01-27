@@ -49,19 +49,14 @@ function EjerciciosProvider({ children }) {
     // Cargar ejercicios del usuario desde Firestore
     const cargarEjerciciosDelUsuario = async (uid) => {
         try {
-            // Primero sincroniza datos locales a Firestore solo si está vacío
-            await sincronizarTodosLosData(uid);
-            
-            // Luego carga los datos de Firestore
+            // Primero CARGAR desde Firestore (por si localStorage está vacío)
             let ejerciciosFirebase = await fbGetEjercicios(uid);
             
-            // Si Firestore tiene datos, restaurar a localStorage
+            // Si Firestore tiene datos, restaurar a localStorage primero
             if (ejerciciosFirebase && ejerciciosFirebase.length > 0) {
-                // Normalizar todos los ejercicios
                 ejerciciosFirebase = ejerciciosFirebase.map(ej => normalizarEjercicio(ej));
-                setEjercicios(ejerciciosFirebase);
-                // Actualizar localStorage con datos de Firestore (source of truth)
                 localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
+                setEjercicios(ejerciciosFirebase);
                 console.log('✅ Datos cargados desde Firestore:', ejerciciosFirebase.length);
             } else {
                 // Si Firestore está vacío, usar localStorage local
@@ -73,6 +68,10 @@ function EjerciciosProvider({ children }) {
                     console.log('✅ Usando datos locales:', datosLocales.length);
                 }
             }
+            
+            // DESPUÉS sincronizar (solo si tiene sentido)
+            await sincronizarTodosLosData(uid);
+            
         } catch (error) {
             console.error('Error cargando ejercicios:', error);
             // Fallback a localStorage si hay error
