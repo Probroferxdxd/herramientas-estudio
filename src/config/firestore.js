@@ -105,7 +105,7 @@ export const cargarDatosDeFirestore = async (uid) => {
       const datos = userSnap.data();
       
       if (datos.ejercicios) {
-        localStorage.setItem('ejercicios', JSON.stringify(datos.ejercicios));
+        localStorage.setItem('flask-ejercicios', JSON.stringify(datos.ejercicios));
       }
       if (datos.flashcards) {
         localStorage.setItem('flashcards', JSON.stringify(datos.flashcards));
