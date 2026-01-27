@@ -61,7 +61,7 @@ function EjerciciosProvider({ children }) {
             } else {
                 // Si Firestore está vacío, usar localStorage local
                 const stored = localStorage.getItem('ejercicios');
-                if (stored) {
+                if (stored && stored.length > 0) {
                     let datosLocales = JSON.parse(stored);
                     datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
                     setEjercicios(datosLocales);
