@@ -35,7 +35,7 @@ function EjerciciosProvider({ children }) {
                 await cargarEjerciciosDelUsuario(currentUser.uid);
             } else {
                 // Si no está logueado: cargar del localStorage
-                const stored = localStorage.getItem('flask-ejercicios');
+                const stored = localStorage.getItem('ejercicios');
                 if (stored) {
                     setEjercicios(JSON.parse(stored));
                 }
@@ -55,12 +55,12 @@ function EjerciciosProvider({ children }) {
             // Si Firestore tiene datos, restaurar a localStorage primero
             if (ejerciciosFirebase && ejerciciosFirebase.length > 0) {
                 ejerciciosFirebase = ejerciciosFirebase.map(ej => normalizarEjercicio(ej));
-                localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFirebase));
+                localStorage.setItem('ejercicios', JSON.stringify(ejerciciosFirebase));
                 setEjercicios(ejerciciosFirebase);
                 console.log('✅ Datos cargados desde Firestore:', ejerciciosFirebase.length);
             } else {
                 // Si Firestore está vacío, usar localStorage local
-                const stored = localStorage.getItem('flask-ejercicios');
+                const stored = localStorage.getItem('ejercicios');
                 if (stored) {
                     let datosLocales = JSON.parse(stored);
                     datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
@@ -75,7 +75,7 @@ function EjerciciosProvider({ children }) {
         } catch (error) {
             console.error('Error cargando ejercicios:', error);
             // Fallback a localStorage si hay error
-            const stored = localStorage.getItem('flask-ejercicios');
+            const stored = localStorage.getItem('ejercicios');
             if (stored) {
                 let datosLocales = JSON.parse(stored);
                 datosLocales = datosLocales.map(ej => normalizarEjercicio(ej));
@@ -88,7 +88,7 @@ function EjerciciosProvider({ children }) {
     // Permite que los datos persistan entre sesiones del navegador
     useEffect(() => {
         if (ejercicios.length > 0) {
-            localStorage.setItem('flask-ejercicios', JSON.stringify(ejercicios));
+            localStorage.setItem('ejercicios', JSON.stringify(ejercicios));
         }
     }, [ejercicios]);
 

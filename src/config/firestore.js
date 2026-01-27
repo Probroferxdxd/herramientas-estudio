@@ -23,7 +23,7 @@ export const sincronizarTodosLosData = async (uid) => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
     
-    const ejerciciosLocal = JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
+    const ejerciciosLocal = JSON.parse(localStorage.getItem('ejercicios')) || [];
     const flashcardsLocal = JSON.parse(localStorage.getItem('flashcards')) || [];
     const progresoLocal = JSON.parse(localStorage.getItem('progreso')) || {};
     
@@ -172,9 +172,9 @@ export const addEjercicio = async (uid, ejercicio) => {
     };
 
     // Guardar en localStorage
-    const ejerciciosLocal = JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
+    const ejerciciosLocal = JSON.parse(localStorage.getItem('ejercicios')) || [];
     ejerciciosLocal.push(ejercicioConId);
-    localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosLocal));
+    localStorage.setItem('ejercicios', JSON.stringify(ejerciciosLocal));
 
     // Guardar en Firestore
     if (uid) {
@@ -208,10 +208,10 @@ export const getEjercicios = async (uid = null) => {
     }
     
     // Si no hay uid o Firestore está vacío, usar localStorage
-    return JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
+    return JSON.parse(localStorage.getItem('ejercicios')) || [];
   } catch (error) {
     console.error('Error obteniendo ejercicios:', error);
-    return JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
+    return JSON.parse(localStorage.getItem('ejercicios')) || [];
   }
 };
 
@@ -223,12 +223,12 @@ export const getEjercicios = async (uid = null) => {
 export const deleteEjercicio = async (uid, ejercicioId) => {
   try {
     // Eliminar de localStorage
-    const ejerciciosLocal = JSON.parse(localStorage.getItem('flask-ejercicios')) || [];
+    const ejerciciosLocal = JSON.parse(localStorage.getItem('ejercicios')) || [];
     const ejercicioAEliminar = ejerciciosLocal.find(e => e.id === ejercicioId);
     
     if (ejercicioAEliminar) {
       const ejerciciosFiltrados = ejerciciosLocal.filter(e => e.id !== ejercicioId);
-      localStorage.setItem('flask-ejercicios', JSON.stringify(ejerciciosFiltrados));
+      localStorage.setItem('ejercicios', JSON.stringify(ejerciciosFiltrados));
 
       // Eliminar de Firestore
       if (uid) {
